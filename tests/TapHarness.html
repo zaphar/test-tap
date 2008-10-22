@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<script type="text/javascript" src="../lib/Test/TAP.js"></script>
+<script type="text/javascript" src="../lib/Test/TAP/Class.js"></script>
+</head>
+<body>
+<style type="text/css">
+.test {
+    margin-top : 10px;
+    margin-bottom : 10px;
+    border : 3px;
+    border-style : inset;
+    overflow : auto;
+}
+
+.small {
+    height : 20px;
+}
+
+.big {
+    height : 600px;
+}
+
+.fail { background-color : red; }
+.pass { background-color : green; }
+
+</style>
+<script type="text/javascript">
+    var top = this;
+    /** Configuration options
+    *
+    */
+    var toLoad = [];
+    var tests = [
+        '01_tap.t.js',
+    ];
+    var lib = '../lib';
+    var testlib = '.';
+    
+    /** Setup
+    *
+    */
+    var loc = String(top.location);
+    var results = [];
+</script>
+This is the Test.TAP.Class and company test harness for the browser.
+<script type="text/javascript" src="../lib/Test/TAPBrowser.js"></script>
+</body>
+</html>
