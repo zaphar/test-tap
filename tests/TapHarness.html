@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
 <script type="text/javascript" src="../lib/Test/TAP.js"></script>
+<script type="text/javascript" src="../lib/Test/TAP/Runner.js"></script>
 <script type="text/javascript" src="../lib/Test/TAP/Class.js"></script>
 </head>
 <body>
@@ -33,20 +34,22 @@
     /** Configuration options
     *
     */
-    var toLoad = [];
     var tests = [
         '01_tap.t.js',
     ];
-    var lib = '../lib';
     var testlib = '.';
     
     /** Setup
     *
     */
-    var loc = String(top.location);
-    var results = [];
 </script>
 This is the Test.TAP.Class and company test harness for the browser.
 <script type="text/javascript" src="../lib/Test/TAPBrowser.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+    var browser = new Test.TAPBrowser(testlib, tests);
+    browser.run();
+};
+</script>
 </body>
 </html>

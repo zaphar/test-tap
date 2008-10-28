@@ -34,15 +34,9 @@
     /** Configuration options
     *
     */
-    var toLoad = [
-        '<list project libraries here>',
-    ];
-    
     var tests = [
         '<list test files here>',
         ];
-    // Change this to your javascript library location
-    var lib = '../lib';
     // Change this to the path of your test scripts
     var testlib = '.';
     
@@ -53,5 +47,11 @@
     var results = [];
 </script>
 <script type="text/javascript" src="../ext/Test/TAPBrowser.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+    var browser = new Test.TAPBrowser(".", tests);
+    browser.run();
+};
+</script>
 </body>
 </html>

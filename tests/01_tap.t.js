@@ -2,9 +2,7 @@
 var out = "nothing yet";
 var diag = "";
 var t = new Test.TAP.Class(); // the real TAP
-//t.plan('no_plan');
 t.plan(27);
-//t.plan());
 
 t.testCan = function () {
     var self = this;
@@ -133,6 +131,7 @@ t.testPass = function() {
 }
 
 t.testPlan = function() {
+    var self = this;
     // setup fake test object
     var f = new Test.TAP(); // the TAP that's failing
     f.out = function(newout) { out = newout };
@@ -140,11 +139,11 @@ t.testPlan = function() {
     
     // begin real tests!
     f.ok(false, 'false fails');
-    this.is(f.counter, 1, 'counter increments by one');
-    this.is(f.planned, 2, 'planned = 2');
+    self.is(f.counter, 1, 'counter increments by one');
+    self.is(f.planned, 2, 'planned = 2');
 }
 
-t.testTodo = function() {
+t.testTodoSkip = function() {
     var self = this;
     var out;
     self.can_ok(Test.TAP, 'todo', 'skip');
@@ -154,23 +153,23 @@ t.testTodo = function() {
     
     f.todo(function() {
         f.ok(true, 'true is true');
-        self.like(out, /ok 1 - # TODO: true is true/g, 
-            'the non todo output is suitably formatted');
     });
+    self.like(out, /ok 1 - # TODO: true is true/g, 
+        'the non todo output is suitably formatted');
     f.ok(!false, 'not false is true');
     self.like(out, /ok 2 -/g, 'the regular output is suitably formatted');
-    
-    f.skip(true, 'because I said so',
+   
+    f.skip(true, 'because I said so', 1,
         function() {
             f.is(1, 2, 'one is two');
-            self.like(out, /^not ok 3 - # SKIP: because I said so$/,
-                'the skipped output is suitably formatted');
         }
     );
+    self.like(out, /^not ok 3 - # SKIP because I said so$/,
+        'the skipped output is suitably formatted');
     f.is(1, 1, 'one is one');
     self.like(out, /ok 4 - one is one/,
         'the non skipped output is suitable formatted');
-}
+};
 
 return t;
 })()
