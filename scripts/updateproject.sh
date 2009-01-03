@@ -39,10 +39,6 @@ fi
 
 echo "Setting up in project: ${DIRNAME}"
 
-
-#create our project directory
-cd $DIRNAME
-
 #set up the directory structure
 if [[ ! -d $DIRNAME/ext ]]
 then
