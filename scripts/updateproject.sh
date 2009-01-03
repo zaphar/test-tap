@@ -28,6 +28,8 @@ do
     esac
 done
 
+MYDIR=$(dirname $0)
+
 if [[ -z $DIRNAME ]]
 then
     echo "No -d option was present. You must provide a Project path.";
@@ -42,13 +44,13 @@ echo "Setting up in project: ${DIRNAME}"
 cd $DIRNAME
 
 #set up the directory structure
-if [[ ! -d ext ]]
+if [[ ! -d $DIRNAME/ext ]]
 then
-    mkdir ext
+    mkdir $DIRNAME/ext
 fi
 
-#copy the files we need for initial setup
-cp -r -f ~/sandbox/Test-TAP/lib/Test ext/
+echo copying the javascript test libraries
+cp -r -f $MYDIR/../lib/Test $DIRNAME/ext/
 
 #now go back to where we started
 cd $WORKING

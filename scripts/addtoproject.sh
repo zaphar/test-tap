@@ -28,6 +28,8 @@ do
     esac
 done
 
+MYDIR=$(dirname $0)
+
 if [[ -z $DIRNAME ]]
 then
     echo "No -d option was present. You must provide a Project path.";
@@ -37,37 +39,37 @@ fi
 
 echo "Setting up in project: ${DIRNAME}"
 
-
-#create our project directory
-cd $DIRNAME
-
 #set up the directory structure
-if [[ ! -d ext ]]
+if [[ ! -d $DIRNAME/ext ]]
 then
-    mkdir ext
+    echo Making ${DIRNAME}/ext
+    mkdir $DIRNAME/ext
 fi
 
-if [[ ! -d harness ]]
+if [[ ! -d $DIRNAME/harness ]]
 then
-    mkdir harness
+    echo Making ${DIRNAME}/harness
+    mkdir $DIRNAME/harness
 fi
 
-if [[ ! -d t || -d tests ]]
+if [[ ! -d $DIRNAME/t || -d $DIRNAME/tests ]]
 then
-    mkdir t
+    echo Making ${DIRNAME}/t
+    mkdir $DIRNAME/t
 fi
 
-#copy the files we need for initial setup
-cp -r -f ~/sandbox/Test-TAP/lib/Test ext/
-if [[ -d t ]]
+echo copy the files we need for initial setup
+cp -r -f $MYDIR/../lib/Test $DIRNAME/ext/
+if [[ -d $DIRNAME/t ]]
 then
-    cp -r -f ~/sandbox/Test-TAP/tmpl/TapHarness.html t/
+    echo copying TapHarness.html to $DIRNAME/t/
+    cp -r -f $MYDIR/../tmpl/TapHarness.html $DIRNAME/t/
 elif [[ -d tests ]]
 then
-    cp -r -f ~/sandbox/Test-TAP/tmpl/TapHarness.html tests/
+    echo copying TapHarness.html to $DIRNAME/tests/
+    cp -r -f $MYDIR/../tmpl/TapHarness.html $DIRNAME/tests/
 fi
 
-cp -r -f ~/sandbox/Test-TAP/tmpl/*rhino* harness/
+echo copying rhino harnesses to $DIRNAME/harness/
+cp -r -f $MYDIR/../tmpl/*rhino* $DIRNAME/harness/
 
-#now go back to where we started
-cd $WORKING
