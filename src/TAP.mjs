@@ -64,8 +64,8 @@ class Tap {
      * Construct a new Tap Suite with a renderLine function.
      * @param {TapRenderer}
      */
-    constructor(renderFunc) {
-        this.#renderer = renderFunc;
+    constructor(renderer) {
+        this.#renderer = renderer;
     }
 
   
@@ -383,6 +383,5 @@ function runBrowserTap(testName, test) {
     return runTest(t, testName, test);
 }
 
-// TODO(zaphar): The runner interface as well.
 export { Tap, runNodeTap, runBrowserTap };
 
