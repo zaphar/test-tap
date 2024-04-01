@@ -1,2 +1,2 @@
 test:
-	rhino harness/rhino_harness.js 
+	node tests/01_tap.t.js 
