@@ -19,6 +19,32 @@
 * @license Artistic-2.0
 */
 
+/** @implements TapRenderer */
+class NodeRenderer {
+    out(text) {
+        import('node:process').then(loaded => {;
+            loaded.stdout.write(text + "\n");
+        })
+    }
+
+    diag(lines) {
+        for (var line of lines) {
+            this.out('# ' + line);
+        }
+    }
+}
+
+/** @implements TapRenderer */
+class BrowserRenderer {
+    out(text) {
+        // TODO(jeremy):
+    }
+
+    diag(lines) {
+        // TODO(jeremy):
+    }
+}
+
 /**
  * The Tap Test Class helper.
  */
@@ -31,35 +57,29 @@ class Tap {
     passed  = 0;
     /** @type Number */
     failed  = 0;
-    /** @type function(TestOutput) */
-    #renderLine
+    /** @type TapRenderer */
+    #renderer
 
     /**
      * Construct a new Tap Suite with a renderLine function.
-     * @param {function(string)}
+     * @param {TapRenderer}
      */
     constructor(renderFunc) {
-        this.#renderLine = renderFunc;
+        this.#renderer = renderFunc;
     }
 
   
     static Browser() {
-        return new Tap(function(text) {
-            // TODO(zaphar): Handle output in a Browser context.
-        });
+        return new Tap(new BrowserRenderer());
     }
 
     static Node() {
-        return new Tap(function(text) {
-            import('node:process').then(loaded => {;
-                loaded.stdout.write(text + "\n");
-            })
-        });
+        return new Tap(new NodeRenderer());
     }
 
     /** Renders output for the test results */
     out(text) {
-        this.#renderLine(text);
+        this.#renderer.out(text);
     };
 
     /**
@@ -78,18 +98,12 @@ class Tap {
     };
 
 
-    /** Diagnostic formatter for TAP Output.
-     *
-     * @param msg {string}
-     */
     diag(msg){
-        if (!msg) {
+        if(!msg) {
             msg = " ";
         }
         var lines = msg.split("\n");
-        for (var line of lines) {
-            this.out('# ' + msg);
-        }
+        this.#renderer.diag(lines);
     };
 
     /** Render a pass TAP output message.
@@ -241,11 +255,8 @@ class Tap {
         var pass = true;
         for (var i=1; i<arguments.length; i++) {
             if (typeof(obj[arguments[i]]) != 'function') {
-                //this.diag('TypeOf ' + arguments[i] + ' method is: ' + typeof(obj[arguments[i]]) );
-                //this.diag('TypeOf prototype is: ' + typeof(obj.prototype) );
                 if (typeof(obj.prototype) != 'undefined') {
                     var result = typeof eval('obj.prototype.' + arguments[i]);
-                    //this.diag('TypeOf prototype method is: ' + result);
                     if (result == 'undefined') {
                         pass = false;
                         this.diag('Missing ' + arguments[i] + ' method');
@@ -319,5 +330,59 @@ class Tap {
 
 }
 
+/**
+ * Run a test and render a summarization.
+ *
+ * @param {Tap} t
+ * @param {string} testName
+ * @param {function(Tap)} test 
+ */
+function runTest(t, testName, test) {
+    t.diag('running ' + testName + ' tests');
+    try {
+        test(t);
+        if (t.planned > t.counter) {
+            t.diag('looks like you planned ' + t.planned + ' tests but only ran '
+                + t.counter + ' tests');
+        } else if (t.planned < t.counter) {
+            t.diag('looks like you planned ' + t.planned + ' tests but ran '
+                + (t.counter - t.planned) + ' tests extra');
+        }
+        t.diag('ran ' + t.counter + ' tests out of ' + t.planned);
+        t.diag('passed ' + t.passed + ' tests out of ' + t.planned);
+        t.diag('failed ' + t.failed + ' tests out of ' + t.planned);
+    }
+    catch (err) {
+        t.diag("Test Suite Crashed!!! (" + err + ")");
+    }
+
+    return t;
+}
+
+/**
+ * Runs a set of TAP tests defined by a function.
+ * Uses the NodeRenderer for the test output.
+ *
+ * @param {string} testName
+ * @param {function(Tap)} test 
+ */
+function runNodeTap(testName, test) {
+    var t = Tap.Node();
+    return runTest(t, testName, test);
+}
+
+/**
+ * Runs a set of TAP tests defined by a function.
+ * Uses the Browser renderer for the test output.
+ *
+ * @param {string} testName
+ * @param {function(Tap)} test 
+ */
+function runBrowserTap(testName, test) {
+    var t = Tap.Browser();
+    return runTest(t, testName, test);
+}
+
 // TODO(zaphar): The runner interface as well.
-export { Tap };
+export { Tap, runNodeTap, runBrowserTap };
+
