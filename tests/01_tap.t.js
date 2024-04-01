@@ -1,22 +1,20 @@
 /** @implements TapRenderer */
 class FakeRenderer {
     output = "nothing yet";
-    diagnostic = "";
+    commentOutput = "";
     
     out(text) {
         this.output = text;
     }
 
-    diag(lines) {
+    comment(lines) {
         for (var line of lines) {
-            this.diagnostic += line;
+            this.commentOutput += line;
         }
     }
 }
 
 import('../src/TAP.mjs').then(m => {
-    var runNodeTap = m.runNodeTap;
-
     function tapSuite(t) {
         t.plan(23);
         
@@ -39,7 +37,7 @@ import('../src/TAP.mjs').then(m => {
             t.like(renderer.output, /ok 2 - object can \[ run \]/, 'can_ok passed');
             
             //Now we need to test the whole prototype method assignment thing
-            
+
             function MockObj() {
                 this.attr = 1;
             }
@@ -47,11 +45,11 @@ import('../src/TAP.mjs').then(m => {
             MockObj.prototype.fakeme = function () {};
             
             f.can_ok(MockObj, 'fakeme');
-            renderer.diagnostic = '';
+            renderer.commentOutput = '';
             t.like(renderer.output, /^ok .* \[ fakeme \]/, 
                 'can_ok recognized prototype methods');
             f.can_ok(MockObj, 'fakeme2');
-            renderer.diagnostic = '';
+            renderer.commentOutput = '';
             t.like(renderer.output, /^not ok .* \[ fakeme2 \]/, 
                 'can_ok prototype recognization doesnt break methods');
         };
@@ -73,9 +71,9 @@ import('../src/TAP.mjs').then(m => {
             var f = new m.Tap(renderer); // the TAP that's failing
             f.plan(10);
             // begin real tests!
-            f.diag("hello");
-            t.diag(renderer.diagnostic);
-            t.like(renderer.diagnostic, /hello/, 'got hello');
+            f.comment("hello");
+            t.comment(renderer.commentOutput);
+            t.like(renderer.commentOutput, /hello/, 'got hello');
         };
         testDiag();
         
@@ -86,10 +84,10 @@ import('../src/TAP.mjs').then(m => {
             
             // begin real tests!
             f.throws_ok(function() {throw new Error('I made a boo boo')}, 'I made a boo boo');
-            //t.diag(renderer.output);
+            //t.comment(renderer.output);
             t.like(renderer.output, /ok 1 - code threw \[Error: I made a boo boo\]/, 'uncaught exception');
             f.throws_ok(function() {}, 'I made a boo boo');
-            //t.diag(renderer.output);
+            //t.comment(renderer.output);
             t.like(renderer.output, /not ok 2 - code threw \[ \]/, 'false failed');
         };
         testException();
@@ -160,5 +158,5 @@ import('../src/TAP.mjs').then(m => {
         
         return t;
     }
-    runNodeTap("Tap dogfood test suite", tapSuite);
+    m.runTest(m.Tap.Node(), "Tap dogfood test suite", tapSuite);
 });

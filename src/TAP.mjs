@@ -27,7 +27,7 @@ class NodeRenderer {
         })
     }
 
-    diag(lines) {
+    comment(lines) {
         for (var line of lines) {
             this.out('# ' + line);
         }
@@ -40,7 +40,7 @@ class BrowserRenderer {
         // TODO(jeremy):
     }
 
-    diag(lines) {
+    comment(lines) {
         // TODO(jeremy):
     }
 }
@@ -98,12 +98,12 @@ class Tap {
     };
 
 
-    diag(msg){
+    comment(msg){
         if(!msg) {
             msg = " ";
         }
         var lines = msg.split("\n");
-        this.#renderer.diag(lines);
+        this.#renderer.comment(lines);
     };
 
     /** Render a pass TAP output message.
@@ -194,7 +194,7 @@ class Tap {
     throws_ok(func, msg) {
         var errormsg = ' ';
         if (typeof func != 'function')
-            this.diag('throws_ok needs a function to run');
+            this.comment('throws_ok needs a function to run');
         
         try {
             func();
@@ -214,7 +214,7 @@ class Tap {
         var errormsg = ' ';
         var msg = false;
         if (typeof func != 'function')
-            this.diag('throws_ok needs a function to run');
+            this.comment('throws_ok needs a function to run');
         
         try {
             func();
@@ -234,7 +234,7 @@ class Tap {
     lives_ok(func, msg) {
         var errormsg = true;
         if (typeof func != 'function')
-            this.diag('throws_ok needs a function to run');
+            this.comment('throws_ok needs a function to run');
         
         try {
             func();
@@ -259,11 +259,11 @@ class Tap {
                     var result = typeof eval('obj.prototype.' + arguments[i]);
                     if (result == 'undefined') {
                         pass = false;
-                        this.diag('Missing ' + arguments[i] + ' method');
+                        this.comment('Missing ' + arguments[i] + ' method');
                     }
                 } else {
                     pass = false;
-                    this.diag('Missing ' + arguments[i] + ' method');
+                    this.comment('Missing ' + arguments[i] + ' method');
                 }
             }
             desc += ' ' + arguments[i];
@@ -338,50 +338,46 @@ class Tap {
  * @param {function(Tap)} test 
  */
 function runTest(t, testName, test) {
-    t.diag('running ' + testName + ' tests');
+    t.comment('running ' + testName + ' tests');
     try {
         test(t);
-        if (t.planned > t.counter) {
-            t.diag('looks like you planned ' + t.planned + ' tests but only ran '
-                + t.counter + ' tests');
-        } else if (t.planned < t.counter) {
-            t.diag('looks like you planned ' + t.planned + ' tests but ran '
-                + (t.counter - t.planned) + ' tests extra');
-        }
-        t.diag('ran ' + t.counter + ' tests out of ' + t.planned);
-        t.diag('passed ' + t.passed + ' tests out of ' + t.planned);
-        t.diag('failed ' + t.failed + ' tests out of ' + t.planned);
+        summarize(t);
     }
     catch (err) {
-        t.diag("Test Suite Crashed!!! (" + err + ")");
+        t.comment("Test Suite Crashed!!! (" + err + ")");
     }
 
     return t;
 }
 
-/**
- * Runs a set of TAP tests defined by a function.
- * Uses the NodeRenderer for the test output.
- *
- * @param {string} testName
- * @param {function(Tap)} test 
- */
-function runNodeTap(testName, test) {
-    var t = Tap.Node();
-    return runTest(t, testName, test);
+function summarize(t) {
+    if (t.planned > t.counter) {
+        t.comment('looks like you planned ' + t.planned + ' tests but only ran '
+            + t.counter + ' tests');
+    } else if (t.planned < t.counter) {
+        t.comment('looks like you planned ' + t.planned + ' tests but ran '
+            + (t.counter - t.planned) + ' tests extra');
+    }
+    t.comment('ran ' + t.counter + ' tests out of ' + t.planned);
+    t.comment('passed ' + t.passed + ' tests out of ' + t.planned);
+    t.comment('failed ' + t.failed + ' tests out of ' + t.planned);
 }
 
 /**
- * Runs a set of TAP tests defined by a function.
- * Uses the Browser renderer for the test output.
- *
- * @param {string} testName
- * @param {function(Tap)} test 
+ * @param {Tap} t
+ * @param {Array<{'plan': Number, name: string, 'test': function(Tap)}} suite 
  */
-function runBrowserTap(testName, test) {
-    var t = Tap.Browser();
-    return runTest(t, testName, test);
+function runSuite(t, suite) {
+    const plan = suite.reduce((acc, item) => {
+        return acc + item.plan
+    }, 0);
+    t.plan(plan);
+    for (var item of suite) {
+        t.comment('running ' + item.name + ' tests');
+        item.test(t);
+    }
+    summarize(t);
 }
 
-export { Tap, runNodeTap, runBrowserTap };
+export { Tap, runTest, runSuite };
 
