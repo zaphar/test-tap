@@ -1,8 +1,0 @@
---- #YAML:1.0
-name: Test.TAP
-version: 0.12
-author:
-  - Jeremy Wall <Jeremy@marzhillstudiso.com>
-abstract: A zero dependency TAP compliant test library. Useable from commandline with no mocking 
-license: perl
-generated_by: Jeremy Wall <Jeremy@marzhillstudiso.com>
