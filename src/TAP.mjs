@@ -142,6 +142,7 @@ class Tap {
      * @param {string} description 
      */
     pass(description) {
+        this.passed++;
         this.mk_tap('ok', description);    
     };
     
@@ -149,6 +150,7 @@ class Tap {
      * @param {string} description 
      */
     fail(description) {
+        this.failed++;
         this.mk_tap('not ok', description);
     };
    
