@@ -384,6 +384,11 @@ function runTest(t, testName, test) {
     return t;
 }
 
+/**
+ * Output a summary of the tests as comments.
+ *
+ * @param {Tap} t 
+ */
 function summarize(t) {
     if (t.planned > t.counter) {
         t.comment('looks like you planned ' + t.planned + ' tests but only ran '
@@ -413,5 +418,5 @@ function runSuite(t, suite) {
     summarize(t);
 }
 
-export { Tap, runTest, runSuite, BrowserRenderer, NodeRenderer };
+export { Tap, runTest, runSuite, summarize, BrowserRenderer, NodeRenderer };
 
