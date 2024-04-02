@@ -10,7 +10,7 @@ class TapRenderer {
      *
      * @param {Array<string>} lines
      */
-    diag(lines) {
+    comment(lines) {
     }
 }
 

@@ -36,12 +36,44 @@ class NodeRenderer {
 
 /** @implements TapRenderer */
 class BrowserRenderer {
+    #target = document.body;
+
+    /** @param {HtmlElement=} target */ 
+    constructor(target) {
+        if (target) {
+            this.#target = target;
+        }
+    }
+
+    /** @returns TextNode */
+    #createText(text) {
+        return document.createTextNode(text);
+    }
+
+    /**
+     * @param {Node} nodes 
+     * @returns HTMLDivElement
+     */
+    #createDiv(nodes) {
+        const div = document.createElement("div");
+        div.append(...nodes);
+        return div;
+    }
+
     out(text) {
-        // TODO(jeremy):
+        const textNode = this.#createText(text);
+        this.#target.appendChild(this.#createDiv([textNode]));
     }
 
     comment(lines) {
         // TODO(jeremy):
+        var elems = [];
+        for (var line of lines) {
+            elems.push(this.#createText(line), document.createElement("br"));
+        }
+        var commentDiv = this.#createDiv(elems);
+        commentDiv.setAttribute("class", "tap-comment");
+        this.#target.appendChild(commentDiv);
     }
 }
 
@@ -379,5 +411,5 @@ function runSuite(t, suite) {
     summarize(t);
 }
 
-export { Tap, runTest, runSuite };
+export { Tap, runTest, runSuite, BrowserRenderer, NodeRenderer };
 
