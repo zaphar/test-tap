@@ -1,5 +1,5 @@
 /** @implements TapRenderer */
-import {Tap, runTest} from '../src/TAP.mjs';
+import {Tap, runTest, NodeRenderer, BrowserRenderer} from '../src/TAP.mjs';
 
 class FakeRenderer {
     output = "nothing yet";

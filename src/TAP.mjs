@@ -21,10 +21,16 @@
 
 /** @implements TapRenderer */
 class NodeRenderer {
+    /** @type {Array<PromiseLike>} */
+    #thunks = [];
+
     out(text) {
-        import('node:process').then(loaded => {;
-            loaded.stdout.write(text + "\n");
-        })
+        this.#thunks.push(
+            // Because this is a ECMAScript module we have to do dynamic module loads
+            // of the node ecosystem when running in Node.js.
+            import('node:process').then(loaded => {
+                loaded.stdout.write(text + "\n");
+        }));
     }
 
     comment(lines) {
@@ -32,13 +38,21 @@ class NodeRenderer {
             this.out('# ' + line);
         }
     }
+
+    // This gives us a way to block on output. It's ghetto but async is a harsh task master.
+    async renderAll() {
+        for (var thunk of this.#thunks) {
+            await thunk;
+        }
+
+    }
 }
 
 /** @implements TapRenderer */
 class BrowserRenderer {
     #target = document.body;
 
-    /** @param {HtmlElement=} target */ 
+    /** @param {HtmlElement=} target */
     constructor(target) {
         if (target) {
             this.#target = target;
@@ -86,32 +100,44 @@ class Tap {
     /** @type Number */
     counter = 0;
     /** @type Number */
-    passed  = 0;
+    passed = 0;
     /** @type Number */
-    failed  = 0;
+    failed = 0;
     /** @type TapRenderer */
-    #renderer
+    renderer
 
     /**
      * Construct a new Tap Suite with a renderLine function.
      * @param {TapRenderer}
      */
     constructor(renderer) {
-        this.#renderer = renderer;
+        this.renderer = renderer;
     }
 
-  
+    /**
+     * @return {{"Renderer": BrowserRenderer, "Tap": Tap}}
+     */
     static Browser() {
+        var r = new BrowserRenderer();
+        return {"Renderer": r, "Tap": new Tap(r)};
         return new Tap(new BrowserRenderer());
     }
 
+    /**
+     * @return {{"Renderer": NodeRenderer, "Tap": Tap}}
+     */
     static Node() {
-        return new Tap(new NodeRenderer());
+        var r = new NodeRenderer();
+        return {"Renderer": r, "Tap": new Tap(r)};
+    }
+
+    isPass() {
+        return this.passed != 0;
     }
 
     /** Renders output for the test results */
     out(text) {
-        this.#renderer.out(text);
+        this.renderer.out(text);
     };
 
     /**
@@ -120,8 +146,8 @@ class Tap {
      * @param {boolean} ok
      * @param {string=} description 
      */
-    mk_tap(ok, description){
-        if(!this.planned){
+    mk_tap(ok, description) {
+        if (!this.planned) {
             this.out("You tried to run tests without a plan.  Gotta have a plan.");
             throw new Error("You tried to run tests without a plan.  Gotta have a plan.");
         }
@@ -130,12 +156,12 @@ class Tap {
     };
 
 
-    comment(msg){
-        if(!msg) {
+    comment(msg) {
+        if (!msg) {
             msg = " ";
         }
         var lines = msg.split("\n");
-        this.#renderer.comment(lines);
+        this.renderer.comment(lines);
     };
 
     /** Render a pass TAP output message.
@@ -143,9 +169,9 @@ class Tap {
      */
     pass(description) {
         this.passed++;
-        this.mk_tap('ok', description);    
+        this.mk_tap('ok', description);
     };
-    
+
     /** Render a fail TAP output message.
      * @param {string} description 
      */
@@ -153,7 +179,7 @@ class Tap {
         this.failed++;
         this.mk_tap('not ok', description);
     };
-   
+
     /** Run a function as a TODO test.
      *
      * @param {function(this:Tap, boolean, description)} func 
@@ -162,12 +188,12 @@ class Tap {
         var self = this;
         var tapper = self.mk_tap;
         self.mk_tap = function(ok, desc) {
-            tapper.apply(self, [ok, "# TODO: "+desc]);
+            tapper.apply(self, [ok, "# TODO: " + desc]);
         }
         func();
         self.mk_tap = tapper;
     }
-   
+
     /** Run a function as a skip Test.
      *
      * @param {boolean} criteria 
@@ -182,8 +208,8 @@ class Tap {
             self.mk_tap = function(ok, desc) {
                 tapper.apply(self, [ok, desc]);
             }
-            for(var i = 0; i < count; i++) {
-                self.fail("# SKIP "+reason)
+            for (var i = 0; i < count; i++) {
+                self.fail("# SKIP " + reason)
             }
             self.mk_tap = tapper;
         } else {
@@ -200,7 +226,7 @@ class Tap {
      * @param {Number=} testCount 
      */
     plan(testCount) {
-        if(this.planned){
+        if (this.planned) {
             throw new Error("you tried to set the plan twice!");
         }
         if (!testCount) {
@@ -210,13 +236,13 @@ class Tap {
             this.out('1..' + testCount);
         }
     };
-    
-    #pass_if(func, desc){
+
+    #pass_if(func, desc) {
         var result = func();
-        if(result) { this.pass(desc) }
-        else       { this.fail(desc) }
+        if (result) { this.pass(desc) }
+        else { this.fail(desc) }
     }
-    
+
     // exception tests
 
     /**
@@ -229,16 +255,16 @@ class Tap {
         var errormsg = ' ';
         if (typeof func != 'function')
             this.comment('throws_ok needs a function to run');
-        
+
         try {
             func();
         }
-        catch(err) {
-            errormsg = err+'';
+        catch (err) {
+            errormsg = err + '';
         }
         this.like(errormsg, msg, 'code threw [' + errormsg + '] expected: [' + msg + ']');
     }
-    
+
     /**
      * Tests that a function throws.
      *
@@ -249,17 +275,17 @@ class Tap {
         var msg = false;
         if (typeof func != 'function')
             this.comment('throws_ok needs a function to run');
-        
+
         try {
             func();
         }
-        catch(err) {
-            errormsg = err+'';
+        catch (err) {
+            errormsg = err + '';
             msg = true;
         }
         this.ok(msg, 'code died with [' + errormsg + ']');
     }
-    
+
     /**
      * Tests that a function does not throw an exception.
      *
@@ -269,11 +295,11 @@ class Tap {
         var errormsg = true;
         if (typeof func != 'function')
             this.comment('throws_ok needs a function to run');
-        
+
         try {
             func();
         }
-        catch(err) {
+        catch (err) {
             errormsg = false;
         }
         this.ok(errormsg, msg);
@@ -287,9 +313,9 @@ class Tap {
     can_ok(obj) {
         var desc = 'object can [';
         var pass = true;
-        for (var i=1; i<arguments.length; i++) {
-            if (typeof(obj[arguments[i]]) != 'function') {
-                if (typeof(obj.prototype) != 'undefined') {
+        for (var i = 1; i < arguments.length; i++) {
+            if (typeof (obj[arguments[i]]) != 'function') {
+                if (typeof (obj.prototype) != 'undefined') {
                     var result = typeof eval('obj.prototype.' + arguments[i]);
                     if (result == 'undefined') {
                         pass = false;
@@ -303,10 +329,10 @@ class Tap {
             desc += ' ' + arguments[i];
         }
         desc += ' ]';
-        this.#pass_if(function(){
-    	    return pass;
+        this.#pass_if(function() {
+            return pass;
         }, desc);
-    
+
     }
 
     /**
@@ -317,7 +343,7 @@ class Tap {
      * @param {string} desc 
      */
     is(got, expected, desc) {
-        this.#pass_if(function(){ return got == expected; }, desc);
+        this.#pass_if(function() { return got == expected; }, desc);
     };
 
 
@@ -328,7 +354,7 @@ class Tap {
      * @param {string} desc 
      */
     ok(got, desc) {
-        this.#pass_if(function(){ return !!got; }, desc);
+        this.#pass_if(function() { return !!got; }, desc);
     };
 
 
@@ -340,13 +366,13 @@ class Tap {
      * @param {string} desc 
      */
     like(string, regex, desc) {
-        this.#pass_if(function(){
-                if(regex instanceof RegExp) {
-                    return string.match(regex)
-                } else {
-                    return string.indexOf(regex) != -1
-                }
-    	}, desc)
+        this.#pass_if(function() {
+            if (regex instanceof RegExp) {
+                return string.match(regex)
+            } else {
+                return string.indexOf(regex) != -1
+            }
+        }, desc)
     }
 
     /**
@@ -357,9 +383,9 @@ class Tap {
      * @param {string} desc 
      */
     unlike(string, regex, desc) {
-        this.#pass_if(function(){
-                return !string.match(regex);
-	    }, desc)
+        this.#pass_if(function() {
+            return !string.match(regex);
+        }, desc)
     }
 
 }
