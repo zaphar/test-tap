@@ -1,5 +1,5 @@
 /** @implements TapRenderer */
-import {Tap, runTest, NodeRenderer, BrowserRenderer} from '../src/TAP.mjs';
+import { Tap } from '../src/Tap.mjs';
 
 class FakeRenderer {
     output = "nothing yet";
@@ -159,4 +159,4 @@ function tapSuite(t) {
     return t;
 }
 
-export { tapSuite, runTest, Tap };
+export { tapSuite };
