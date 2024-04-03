@@ -1,0 +1,34 @@
+{
+  "name": "test-tap",
+  "version": "0.0.1",
+  "description": "Test-Tap a 0 dependency single file Test Anything Protocol library",
+  "type": "module",
+  "directories": {
+    "test": "tests",
+    "lib": "src"
+  },
+  "files": [
+      "src/*.mjs",
+      "src/*.js"
+  ],
+  "scripts": {
+    "test": "node tests/01_tap.t.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaphar/test-tap.git"
+  },
+  "keywords": [
+    "testing",
+    "tap"
+  ],
+  "author": "Jeremy Wall (jeremy@marzhillstudios.com)",
+  "license": "Artistic-2.0",
+  "bugs": {
+    "url": "https://github.com/zaphar/test-tap/issues"
+  },
+  "homepage": "https://github.com/zaphar/test-tap#readme",
+  "dependencies": {
+    "esm": "^3.2.25"
+  }
+}

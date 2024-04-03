@@ -1,11 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-
-<script type="text/javascript" src="../lib/Test/TAP.js"></script>
-<script type="text/javascript" src="../lib/Test/TAP/Runner.js"></script>
-<script type="text/javascript" src="../lib/Test/TAP/Class.js"></script>
 </head>
 <body>
 <style type="text/css">
@@ -30,26 +25,19 @@
 
 </style>
 <script type="text/javascript">
-    var top = this;
     /** Configuration options
     *
     */
     var tests = [
         '01_tap.t.js',
     ];
-    var testlib = '.';
-    
-    /** Setup
-    *
-    */
 </script>
-This is the Test.TAP.Class and company test harness for the browser.
-<script type="text/javascript" src="../lib/Test/TAPBrowser.js"></script>
-<script type="text/javascript">
-window.onload = function() {
-    var browser = new Test.TAPBrowser(testlib, tests);
-    browser.run();
-};
+This is the Tap test harness for the browser.
+<script type="module">
+    import { Tap, runTest } from '../src/TAP.mjs';
+    import { tapSuite } from './suite.mjs';
+    
+    runTest(Tap.Browser(), 'Tap Dogfood Tests', tapSuite);
 </script>
 </body>
 </html>
